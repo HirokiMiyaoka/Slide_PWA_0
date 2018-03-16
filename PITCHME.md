@@ -179,11 +179,17 @@ PWAは強力故に不正な攻撃をされると非常に危険です。
 
 +++?code=docs/manifest.json
 
+### test
+
+test
+
 +++
 
 ### Webアプリ
 
 ミニマルな状態で作ります。
+
++++?code=docs/0_minimal/index.html
 
 +++
 
