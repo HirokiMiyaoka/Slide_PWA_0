@@ -1,1 +1,2 @@
-.reveal h1, .reveal h2, .reveal h3, .reveal h4, .reveal h5, .reveal h6 { color: gray; }
+.reveal * { text-align: left; font-size: 0.8em; }
+.reveal h1, .reveal h2, .reveal h3, .reveal h4, .reveal h5, .reveal h6 { font-size: 1.1em; }
