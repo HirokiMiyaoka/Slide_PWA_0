@@ -267,8 +267,8 @@ ServiceWorkerは通信の制御が可能です。この通信とは以下のよ�
   JS == fetch ==> ServiceWorker ==> ブラウザ ==> Webサーバー
      <===========               <==         <==
 [PWA fetchイベント監視時]
-  JS == fetch ==> ServiceWorker ==> ブラウザ     Webサーバー
-     <=========== (Responseを作って返す)
+  JS == fetch ==> ServiceWorker
+     <=========== Responseを作って返す
 ```
 
 +++
