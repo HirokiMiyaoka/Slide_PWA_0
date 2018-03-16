@@ -170,18 +170,18 @@ PWAは強力故に不正な攻撃をされると非常に危険です。
   * 適当に立ち上げてください。
   * localhostや自分のIPアドレスならポート番号等は特に気にしなくても問題ないです。
 
-+++?code=docs/manifest.json
++++?code=docs/manifest.json&title=manifest.json
 
 とりあえずこれ以降触ることのないManifestから作っておきます。
 これがPWAのサイトの設定で、インストールされたときにここの情報を参照し、アイコンや名前などを設定します。
 
-+++?code=docs/0_minimal/sw.js
++++?code=docs/0_minimal/sw.js&title=sw.js
 
 最も簡単なServiceWorker（何もしない空ファイル）を作ります。
 ファイルとして存在していることは重要なので、ファイルだけは作ってください。
 
 
-+++?code=docs/0_minimal/index.html
++++?code=docs/0_minimal/index.html&title=index.html
 
 Webアプリをミニマルな状態で作ります。
 
