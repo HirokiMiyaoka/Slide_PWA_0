@@ -189,6 +189,30 @@ Web App ManifestとServiceWorkerを登録することしかしていません。
 
 +++
 
+### ServiceWorker登録関数の説明
+
+```
+function InitServiceWorker() {
+    if ( !( 'serviceWorker' in navigator ) ) { return; }
+    navigator.serviceWorker.register( '/sw.js', {scope: '/'} );
+}
+```
+@[2](navigatorにserviceWorkerがない場合は登録作業をしない)
+
++++
+
+### ServiceWorker登録関数の説明
+
+```
+function InitServiceWorker() {
+    if ( !( 'serviceWorker' in navigator ) ) { return; }
+    navigator.serviceWorker.register( '/sw.js', {scope: '/'} );
+}
+```
+@[3](実際の登録作業で、scopeはServiceWorkerの動作範囲)
+
++++
+
 ## PWAの確認について
 
 ---
