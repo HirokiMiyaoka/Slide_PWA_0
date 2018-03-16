@@ -202,6 +202,19 @@ function InitServiceWorker() {
 
 +++
 
+### 今回のコード
+
+```
+function InitServiceWorker() {
+    if ( !( 'serviceWorker' in navigator ) ) { return; }
+    navigator.serviceWorker.register( './sw.js', {scope: '/0_minimal'} );
+}
+```
+
+ServiceWorkerは同じサイトであっても対象となるスコープ=パスが異なれば複数設置可能なので、今回はサンプルをいくつか用意する都合上、このようなコードとなります。
+
++++
+
 ## PWAの確認について
 
 ---
