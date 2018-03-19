@@ -6,18 +6,13 @@
 <link rel="manifest" href="/Slide_PWA_0/manifest.json">
 <script type="text/javascript">
 function InitServiceWorker() {
-    if ( !( 'serviceWorker' in navigator ) ) { return Promise.reject( 'No ServiceWorker' ); }
+    if ( !( 'serviceWorker' in navigator ) ) { return ; }
     navigator.serviceWorker.register( './sw.js', { scope: './' } );
-    return navigator.serviceWorker.ready.then( ( registration ) => {console.log('on ready');
-        if ( !registration.active ) { throw 'ServiceWorker not active.'; }
-        return registration;
-    } );
 }
-document.addEventListener( 'DOMContentLoaded', () => {
-    InitServiceWorker().then( ( registration ) => {
-        document.getElementById( 'cat' ).src = './dog.svg';
-    } );
-} );
+InitServiceWorker();
+setTimeout( () => {
+    document.getElementById( 'cat' ).src = './dog.svg';
+}, 5000 );
 </script>
 <style type="text/css">
 	div { text-align: center; width: 50%; float: left; }
