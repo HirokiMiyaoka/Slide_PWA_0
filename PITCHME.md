@@ -459,42 +459,12 @@ self.addEventListener( 'install', ( event ) => {
 
 ## さらに複雑な例
 
-もう少し複雑なことをしてみます。
+もう少し複雑なこととして、リクエストの書き換えではなく、あらかじめ猫の画像をキャッシュしておき、それのレスポンスを返すこととします。
+SW以外は同じ挙動とします。
 
-* クライアント側で犬の画像を表示し、DOM読み込み後SWの登録する
-* SWは以下の準備をする
-    * install時には猫の画像をあらかじめダウンロードしてキャッシュする
-    * activate時には古いキャッシュを探してすべて削除する
-    * fetch時には犬の画像の時に猫の画像のキャッシュを返す
-* SWの準備完了後に再度犬の画像を表示する（表示されるのは猫）
-
-+++?code=docs/5_dog2cat_cache/index.html&title=/5_dog2cat_cache/index.html
-
-+++
-
-```
-function InitServiceWorker() {
-    if ( !( 'serviceWorker' in navigator ) ) { return Promise.reject( 'No ServiceWorker' ); }
-    navigator.serviceWorker.register( './sw.js', { scope: './' } );
-    return navigator.serviceWorker.ready.then( ( registration ) => {
-        if ( !registration.active ) { throw 'ServiceWorker not active.'; }
-        return registration;
-    } );
-}
-```
-@[2](Promiseで結果を返すようにする)
-@[4](SWの準備ができた時に返るPromiseオブジェクト)
-
-+++
-
-```
-document.addEventListener( 'DOMContentLoaded', () => {
-    InitServiceWorker().then( ( registration ) => {
-        document.getElementById( 'cat' ).src = './dog.svg';
-    } );
-} );
-```
-@[2](SWの準備が正常に終わった時に実行)
+* install時には猫の画像をあらかじめダウンロードしてキャッシュする
+* activate時には古いキャッシュを探してすべて削除する
+* fetch時には犬の画像の時に猫の画像のキャッシュを返す
 
 +++?code=docs/5_dog2cat_cache/sw.js&title=/5_dog2cat_cache/sw.js
 
