@@ -1,5 +1,7 @@
+const VERSION = 1;
+
 self.addEventListener( 'install', ( event ) => {
-	console.log( 'SW:', 'install' );
+	console.log( 'SW:', 'install', VERSION );
 } );
 
 self.addEventListener( 'activate', ( event ) => {
