@@ -330,9 +330,94 @@ self.addEventListener('install', (event) => { /*インストール時の挙動*/
 
 ただし、これはPWAを最大限に使う=ServiceWorkerの機能をフルで使う+クライアント側が完全依存する場合に発生する壁なので、あくまでサポート側に徹する使い方の場合特に強制反映しても問題ないため、今回の実装では無視します。
 
+
 ---
 
-### 最小強制反映
+## 犬を猫にするサンプル
+
+ライフサイクルを確認すべく、以下のようなことをしてみます。
+
+* 犬の画像を表示
+* SWをインストール要請5秒後に犬の画像をもう一枚表示
+    * この時間にはSWのインストールは終わっているだろうということで。
+* SW側ではインストール時に猫の画像を取得してキャッシュとして持つ
+* fetchイベントを登録し、犬の画像をリクエストされたらキャッシュしている猫の画像を返す
+
++++?code=docs/2_dog2cat/index.html&title=/1_install/index.html
+
+HTMLではSWの登録と5s後に `dog.svg` を表示するコードが書かれています。
+
++++?code=docs/2_dog2cat/sw.js&title=/1_install/sw.js
+
++++
+
+```
+const DOMAIN = 'sample_static-v';
+const CACHE_VERSION = 1;
+const CACHE_NAME = DOMAIN + CACHE_VERSION;
+```
+
+キャッシュのための定数設定です。
+キャッシュには任意で名前を付けることができ、ある程度の固有文字列+数値くらいで作ります。
+キャッシュの容量は無限ではないので、新しいバージョンになったら古いキャッシュを削除するのですが、その時自分の作ったキャッシュを削除するためにバージョンの数値とそれ以外を分離して保持しておきます。
+
++++
+
+```
+self.addEventListener( 'install', ( event ) => {
+	console.log( 'SW:', 'install' );
+	event.waitUntil( caches.open( CACHE_NAME ).then( ( cache ) => {
+		cache.add('/Slide_PWA_0/2_dog2cat/cat.svg');
+	} ) );
+} );
+```
+@[3](今のバージョンのキャッシュを開きます)
+@[4](キャッシュに対してファイルを登録すると、そのキャッシュを生成して保持します)
+@[5](今回はskipWaitingを使っていないパターンです)
+
++++
+
+```
+self.addEventListener( 'activate', ( event ) => {
+	console.log( 'SW:', 'activate' );
+	event.waitUntil( caches.keys().then( ( keys ) => {
+		return Promise.all(
+			keys.filter( ( key ) => {
+				return key.indexOf( DOMAIN ) === 0 && key !== CACHE_NAME;
+			} ).map( ( key ) => {
+				console.log( 'Delete cache:', key );
+				return caches.delete( key );
+			} )
+		);
+	} ) );
+} );
+```
+@[3](自分の持つすべてのキャッシュのキーを取得します)
+@[6](キーのうち、キャッシュのバージョン以外が一致して、バージョンが一致しないものだけ抽出します)
+@[9](古いキャッシュなので削除します)
+
++++
+
+### 挙動
+
+このサンプルは以下のような挙動になります。
+
+* 犬の画像(`dog.svg`)が表示される
+* SWがキャッシュを作り、猫の画像を得る
+* SWの置き換えが発生しないため、5s後に犬の画像(`dog.svg`)を表示すると、犬の画像を表示する
+* リロードするとSW制御下に入るので、犬の画像(`dog.svg`)を表示すると、SWが猫の画像(`cat.svg`)のキャッシュを返し、猫の画像を表示する
+
+このように、SWは登録してもすぐに有効化するような記述がないと、リロード後にしか効果を発揮しません。
+これが通常の挙動です。
+
+---
+
+## 最小強制反映
+
+通常挙動ではSWが無理矢理更新されることはないですが、無理矢理更新するには次のようにします。
+
+* installイベントで `self.skipWaiting` を実行
+* activateイベントで `self.clients.claim` を実行
 
 +++?code=docs/1_install/sw.js&title=/1_install/sw.js
 
@@ -357,20 +442,6 @@ self.addEventListener( 'activate', ( event ) => {
 ```
 @[1](インストール後のイベントの登録)
 @[2](self.clients.claimで現在稼働中のクライアントのSWを今のものに置き換えます)
-
-install時の`self.skipWaiting`とセットで、強制的に新しいバージョンに反映が可能です。
-
----
-
-## 犬を猫にするサンプル
-
-ライフサイクルを確認すべく、以下のようなことをしてみます。
-
-* 犬の画像を表示
-* SWをインストール要請5秒後に犬の画像をもう一枚表示
-    * この時間にはSWのインストールは終わっているだろうということで。
-* SW側ではインストール時に猫の画像を取得してキャッシュとして持つ
-* fetchイベントを登録し、犬の画像をリクエストされたらキャッシュしている猫の画像を返す
 
 ---
 
