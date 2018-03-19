@@ -340,61 +340,47 @@ self.addEventListener( 'install', (event) => { /*インストール時の挙動*
 * 犬の画像を表示
 * SWをインストール要請5秒後に犬の画像をもう一枚表示
     * この時間にはSWのインストールは終わっているだろうということで。
-* SW側ではインストール時に猫の画像を取得してキャッシュとして持つ
-* fetchイベントを登録し、犬の画像をリクエストされたらキャッシュしている猫の画像を返す
+* SW側ではfetchイベントを登録し、犬の画像をリクエストされたら猫の画像のリクエストに差し替える
 
-+++?code=docs/2_dog2cat/index.html&title=/1_install/index.html
++++?code=docs/2_dog2cat/index.html&title=/2_dog2cat/index.html
 
 HTMLではSWの登録と5s後に `dog.svg` を表示するコードが書かれています。
 
-+++?code=docs/2_dog2cat/sw.js&title=/1_install/sw.js
++++?code=docs/2_dog2cat/sw.js&title=/2_dog2cat/sw.js
 
 +++
 
-```
-const DOMAIN = 'sample_static-v';
-const CACHE_VERSION = 1;
-const CACHE_NAME = DOMAIN + CACHE_VERSION;
-```
-
-キャッシュのための定数設定です。
-キャッシュには任意で名前を付けることができ、ある程度の固有文字列+数値くらいで作ります。
-キャッシュの容量は無限ではないので、新しいバージョンになったら古いキャッシュを削除するのですが、その時自分の作ったキャッシュを削除するためにバージョンの数値とそれ以外を分離して保持しておきます。
-
-+++
+### SWのインストール
 
 ```
 self.addEventListener( 'install', ( event ) => {
 	console.log( 'SW:', 'install' );
-	event.waitUntil( caches.open( CACHE_NAME ).then( ( cache ) => {
-		cache.add('/Slide_PWA_0/2_dog2cat/cat.svg');
-	} ) );
+} );
+
+self.addEventListener( 'activate', ( event ) => {
+	console.log( 'SW:', 'activate' );
 } );
 ```
-@[3](今のバージョンのキャッシュを開きます)
-@[4](キャッシュに対してファイルを登録すると、そのキャッシュを生成して保持します)
-@[5](今回はskipWaitingを使っていないパターンです)
 
 +++
 
+### fetchイベントの登録
+
 ```
-self.addEventListener( 'activate', ( event ) => {
-	console.log( 'SW:', 'activate' );
-	event.waitUntil( caches.keys().then( ( keys ) => {
-		return Promise.all(
-			keys.filter( ( key ) => {
-				return key.indexOf( DOMAIN ) === 0 && key !== CACHE_NAME;
-			} ).map( ( key ) => {
-				console.log( 'Delete cache:', key );
-				return caches.delete( key );
-			} )
-		);
-	} ) );
+self.addEventListener( 'fetch', ( event ) => {
+	console.log( 'SW:', 'fetch', event.request.url );
+	const url = new URL( event.request.url );
+
+	if ( url.origin == location.origin && url.pathname == '/Slide_PWA_0/2_dog2cat/dog.svg' ) {
+		event.respondWith( fetch( '/Slide_PWA_0/2_dog2cat/cat.svg' ).then( ( response ) => {
+			return response;
+		} ) );
+	}
 } );
 ```
-@[3](自分の持つすべてのキャッシュのキーを取得します)
-@[6](キーのうち、キャッシュのバージョン以外が一致して、バージョンが一致しないものだけ抽出します)
-@[9](古いキャッシュなので削除します)
+@[5](犬の画像のリクエストを探す)
+@[6](猫の画像のリクエストに書き換え、その結果を犬の画像のレスポンスとして返す)
+@[9](何もしない場合は通常のリクエストがそのまま走る)
 
 +++
 
@@ -403,43 +389,70 @@ self.addEventListener( 'activate', ( event ) => {
 このサンプルは以下のような挙動になります。
 
 * 犬の画像(`dog.svg`)が表示される
-* SWがキャッシュを作り、猫の画像を得る
-* SWの置き換えが発生しないため、5s後に犬の画像(`dog.svg`)を表示すると、犬の画像を表示する
-* リロードするとSW制御下に入るので、犬の画像(`dog.svg`)を表示すると、SWが猫の画像(`cat.svg`)のキャッシュを返し、猫の画像を表示する
+* SWがインストールされるが、すぐには有効化されない。
+* SWによるリクエストの差し替えが発生しないため、5s後に犬の画像(`dog.svg`)を表示すると、犬の画像を表示する
+* リロードするとSW制御下に入るので、犬の画像(`dog.svg`)を表示すると、SWが猫の画像(`cat.svg`)のレスポンスを返し、猫の画像を表示する
 
 このように、SWは登録してもすぐに有効化するような記述がないと、リロード後にしか効果を発揮しません。
 これが通常の挙動です。
 
 ---
 
-## 最小強制反映
+## すぐに有効化するサンプル
 
-通常挙動ではSWが無理矢理更新されることはないですが、無理矢理更新するには次のようにします。
+SWインストール後すぐに有効化します。
 
-* installイベントで `self.skipWaiting` を実行
-* activateイベントで `self.clients.claim` を実行
-
-+++?code=docs/1_install/sw.js&title=/1_install/sw.js
++++?code=docs/3_dog2cat_update/sw.js&title=/3_dog2cat_update/sw.js
 
 +++
 
-```
-self.addEventListener( 'install', ( event ) => {
-	console.log( 'SW:', 'install', ++count.install );
-	event.waitUntil( self.skipWaiting() );
-} );
-```
-@[3](self.skipWaitingで待機状態にしない)
-
-+++
+### 更新後すぐに適用
 
 ```
 self.addEventListener( 'activate', ( event ) => {
-	console.log( 'SW:', 'activate', ++count.activate );
+	console.log( 'SW:', 'activate' );
 	event.waitUntil( self.clients.claim() );
 } );
 ```
-@[2](self.clients.claimで現在稼働中のクライアントのSWを今のものに置き換えます)
+@[3](これを入れるとSWの制御下に入る予定のページすべてで新しいSWを有効化します)
+
++++
+
+### 挙動
+
+先ほど一行加えただけですが、以下のようになります。
+
+* 犬の画像(`dog.svg`)が表示される
+* SWがインストールされ、このページはSW制御下にないのですぐに有効化される
+* SWによるリクエストの差し替えが発生しないため、5s後に犬の画像(`dog.svg`)を表示すると、犬の画像を表示する
+* リロードするとSW制御下に入るので、犬の画像(`dog.svg`)を表示すると、SWが猫の画像(`cat.svg`)のレスポンスを返し、猫の画像を表示する
+
+---
+
+### 強制更新は発生しない
+
+これでSWの早期有効化が実現しますが、同じSW制御下の別クライアントがいる場合、そのクライアントがすべて閉じられない限り、有効化されません。
+つまり以下のような挙動になります。
+
+* 犬の画像(`dog.svg`)が表示される
+* SWがインストールされるが、旧SWが稼働中のため、待機状態になる。
+* 旧SWのまま動作する。
+
+これも解決するためには、次のようにします。
+
++++?code=docs/4_dog2cat_omake/sw.js&title=/4_dog2cat_omake/sw.js
+
++++
+
+### インストールしたら待機状態にしない
+
+```
+self.addEventListener( 'install', ( event ) => {
+	console.log( 'SW:', 'install' );
+	event.waitUntil( self.skipWaiting() );
+} );
+```
+@[3](これによりインストール後待機状態にしないため、activateの時にすべてのクライアントのSWが更新されます)
 
 ---
 
