@@ -2,6 +2,7 @@ let count = { install: 0, activate: 0 };
 
 self.addEventListener( 'install', ( event ) => {
 	console.log( 'SW:', 'install', ++count.install );
+	console.log( location );
 	event.waitUntil( self.skipWaiting() );
 } );
 
