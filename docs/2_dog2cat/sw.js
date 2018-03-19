@@ -3,7 +3,7 @@ const CACHE_VERSION = 'sample_static-v1';
 self.addEventListener( 'install', ( event ) => {
 	console.log( 'SW:', 'install' );
 	event.waitUntil( caches.open( CACHE_VERSION ).then( ( cache ) => {
-		cache.add('/cat.svg');
+		cache.add('./cat.svg');
 	} ) );
 } );
 
