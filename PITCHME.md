@@ -574,13 +574,60 @@ self.addEventListener( 'fetch', ( event ) => {
 
 ### クライアント側でのアップデートの検出
 
-`navigator.serviceWorker.ready` はインストールが終わり次第呼ばれるPromiseで、その引数として渡される `registration` に更新を検出するイベントを登録することができます。
+`navigator.serviceWorker.ready` は初回ならインストールが終わりSWの最低限の準備が出来次第呼ばれるPromiseで、その引数として渡される `registration` に更新を検出するイベントを登録することができます。
 
 具体的には次のように使います。
 
++++?code=docs/6_update_found/index.html&title=/Slide_PWA_0/6_update_found/index.html
+
 +++
 
+### 新しいServiceWorkerの登録
 
+```
+function InitServiceWorker() {
+    if ( !( 'serviceWorker' in navigator ) ) { return Promise.reject( 'No ServiceWorker' ); }
+    navigator.serviceWorker.register( './sw.js', { scope: './' } );
+    return navigator.serviceWorker.ready.then( ( registration ) => {
+        if ( !registration.active ) { throw 'ServiceWorker not active.'; }
+        return registration;
+    } );
+}
+```
+@[2](Promiseを返す構造に変更)
+@[4](インストール後に返ってくるPromise)
+@[6](登録情報周りのオブジェクトを返す)
+
++++
+
+```
+document.addEventListener( 'DOMContentLoaded', () => {
+    InitServiceWorker().then( ( registration ) => {
+        registration.addEventListener( 'updatefound', ( event ) => {
+            console.log( 'updatefound' );
+        } );
+        console.log( 'Set update button.' );
+        document.getElementById( 'update' ).addEventListener( 'click', ()=> {
+            registration.update();
+        } );
+    }, false );
+} );
+```
+@[2](DOM読み込み後実行に変更)
+@[4](SWの更新を検出。このタイミングでリロードなど行う)
+@[8](ボタンクリック時に登録情報から更新依頼を投げる)
+
++++?code=docs/6_update_found/sw.js&title=/Slide_PWA_0/6_update_found/sw.js
+
++++
+
+### 挙動
+
+キャッシュヘッダの制御云々
+
+とりあえずそのヘッダを返さないローカル環境なら動く
+
+Chromeはヘッダに従うので、ヘッダor1日縛りが発揮される
 
 ---
 
@@ -593,6 +640,8 @@ self.addEventListener( 'fetch', ( event ) => {
 * 登録周りのライフサイクルは複雑なため、何も考えずSWが登録されている前提で動作させてはいけない
     * 登録～有効化以外はイベント発生時という分かりやすい単位で動くので、序盤の初期設定だけはきっちりすること
     * 条件を満たすために、例えば登録作業後必ずSWの更新をかけ、更新作業が発生したらリロードするという手もある
+* キャッシュに関してはいろいろあるので何か考えておくこと
+    * SWへのキャッシュはヘッダや1日ルールがあるので、場合に応じて適切なキャッシュ対策を施す必要がある
 
 ---
 
