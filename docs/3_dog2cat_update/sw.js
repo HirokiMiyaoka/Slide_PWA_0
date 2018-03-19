@@ -5,7 +5,7 @@ const CACHE_NAME = DOMAIN + CACHE_VERSION;
 self.addEventListener( 'install', ( event ) => {
 	console.log( 'SW:', 'install' );
 	event.waitUntil( caches.open( CACHE_NAME ).then( ( cache ) => {
-		cache.add('/Slide_PWA_0/2_dog2cat/cat.svg');
+		cache.add('/Slide_PWA_0/3_dog2cat_update/cat.svg');
 	} ).then( () => {
 		return self.skipWaiting();
 	} ) );
@@ -31,7 +31,7 @@ self.addEventListener( 'fetch', ( event ) => {
 	console.log( 'SW:', 'fetch', event.request.url );
 	const url = new URL( event.request.url );
 
-	if ( url.origin == location.origin && url.pathname == '/Slide_PWA_0/2_dog2cat/dog.svg' ) {
-		event.respondWith( caches.match( '/Slide_PWA_0/2_dog2cat/cat.svg' ) );
+	if ( url.origin == location.origin && url.pathname == '/Slide_PWA_0/3_dog2cat_update/dog.svg' ) {
+		event.respondWith( caches.match( '/Slide_PWA_0/3_dog2cat_update/cat.svg' ) );
 	}
 } );
