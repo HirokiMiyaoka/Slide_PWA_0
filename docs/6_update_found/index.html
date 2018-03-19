@@ -18,6 +18,7 @@ document.addEventListener( 'DOMContentLoaded', () => {
         registration.addEventListener( 'updatefound', ( event ) => {
             console.log( 'updatefound', event );
         } );
+        console.log( 'Set update button.' );
         document.getElementById( 'update' ).addEventListener( 'click', ()=> {
             registration.update().then( () => {
                 if ( navigator.serviceWorker.controller ) { return ; }
