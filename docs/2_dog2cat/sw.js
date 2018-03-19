@@ -1,14 +1,26 @@
-const CACHE_VERSION = 'sample_static-v1';
+const DOMAIN = 'sample_static-v';
+const CACHE_VERSION = 1;
+const CACHE_NAME = DOMAIN + CACHE_VERSION;
 
 self.addEventListener( 'install', ( event ) => {
 	console.log( 'SW:', 'install' );
-	event.waitUntil( caches.open( CACHE_VERSION ).then( ( cache ) => {
+	event.waitUntil( caches.open( CACHE_NAME ).then( ( cache ) => {
 		cache.add('/Slide_PWA_0/2_dog2cat/cat.svg');
 	} ) );
 } );
 
 self.addEventListener( 'activate', ( event ) => {
 	console.log( 'SW:', 'activate' );
+	event.waitUntil( caches.keys().then( ( keys ) => {
+		return Promise.all(
+			keys.filter( ( key ) => {
+				return key.indexOf( DOMAIN ) === 0 && key !== CACHE_NAME;
+			} ).map( ( key ) => {
+				console.log( 'Delete cache:', key );
+				return caches.delete( key );
+			} )
+		);
+	} );
 } );
 
 self.addEventListener( 'fetch', ( event ) => {
