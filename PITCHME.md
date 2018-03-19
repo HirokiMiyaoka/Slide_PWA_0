@@ -294,6 +294,21 @@ self.addEventListener( 'install', (event) => { /*インストール時の挙動*
 
 +++
 
+### 最小の動作するSW
+
+```
+self.addEventListener( 'install', ( event ) => {
+	console.log( 'SW:', 'install' );
+	console.log( location );
+} );
+
+self.addEventListener( 'activate', ( event ) => {
+	console.log( 'SW:', 'activate' );
+} );
+```
+
++++
+
 ### ServiceWorkerのキャッシュの挙動
 
 * 更新時、差分が無ければ特に何もしない
@@ -347,20 +362,6 @@ self.addEventListener( 'install', (event) => { /*インストール時の挙動*
 HTMLではSWの登録と5s後に `dog.svg` を表示するコードが書かれています。
 
 +++?code=docs/2_dog2cat/sw.js&title=/2_dog2cat/sw.js
-
-+++
-
-### SWのインストール
-
-```
-self.addEventListener( 'install', ( event ) => {
-	console.log( 'SW:', 'install' );
-} );
-
-self.addEventListener( 'activate', ( event ) => {
-	console.log( 'SW:', 'activate' );
-} );
-```
 
 +++
 
@@ -453,6 +454,118 @@ self.addEventListener( 'install', ( event ) => {
 } );
 ```
 @[3](これによりインストール後待機状態にしないため、activateの時にすべてのクライアントのSWが更新されます)
+
+---
+
+## さらに複雑な例
+
+もう少し複雑なことをしてみます。
+
+* クライアント側で犬の画像を表示し、DOM読み込み後SWの登録する
+* SWは以下の準備をする
+    * install時には猫の画像をあらかじめダウンロードしてキャッシュする
+    * activate時には古いキャッシュを探してすべて削除する
+    * fetch時には犬の画像の時に猫の画像のキャッシュを返す
+* SWの準備完了後に再度犬の画像を表示する（表示されるのは猫）
+
++++?code=docs/5_dog2cat_cache/index.html&title=/5_dog2cat_cache/index.html
+
++++
+
+```
+function InitServiceWorker() {
+    if ( !( 'serviceWorker' in navigator ) ) { return Promise.reject( 'No ServiceWorker' ); }
+    navigator.serviceWorker.register( './sw.js', { scope: './' } );
+    return navigator.serviceWorker.ready.then( ( registration ) => {
+        if ( !registration.active ) { throw 'ServiceWorker not active.'; }
+        return registration;
+    } );
+}
+```
+@[2](Promiseで結果を返すようにする)
+@[4](SWの準備ができた時に返るPromiseオブジェクト)
+
++++
+
+```
+document.addEventListener( 'DOMContentLoaded', () => {
+    InitServiceWorker().then( ( registration ) => {
+        document.getElementById( 'cat' ).src = './dog.svg';
+    } );
+} );
+```
+@[2](SWの準備が正常に終わった時に実行)
+
++++?code=docs/5_dog2cat_cache/sw.js&title=/5_dog2cat_cache/sw.js
+
++++
+
+```
+const DOMAIN = 'sample_static-v';
+const CACHE_VERSION = 1;
+const CACHE_NAME = DOMAIN + CACHE_VERSION;
+```
+
+キャッシュ用の定数達です。
+キャッシュのバージョンは固定文字列+バージョン番号で管理されますが、自分で作ったキャッシュを正確に消すために分けてあります。
+
++++
+
+```
+self.addEventListener( 'install', ( event ) => {
+	console.log( 'SW:', 'install' );
+	event.waitUntil( caches.open( CACHE_NAME ).then( ( cache ) => {
+		cache.add('/Slide_PWA_0/5_dog2cat_cache/cat.svg');
+	} ).then( () => {
+		return self.skipWaiting();
+	} ) );
+} );
+```
+@[3](キャッシュを今のバージョンで開きます)
+@[4](猫の画像をダウンロードしてキャッシュに追加します)
+@[6](SWを待機状態にしません)
+
++++
+
+```
+self.addEventListener( 'activate', ( event ) => {
+	console.log( 'SW:', 'activate' );
+	event.waitUntil( caches.keys().then( ( keys ) => {
+		return Promise.all(
+			keys.filter( ( key ) => {
+				return key.indexOf( DOMAIN ) === 0 && key !== CACHE_NAME;
+			} ).map( ( key ) => {
+				console.log( 'Delete cache:', key );
+				return caches.delete( key );
+			} )
+		);
+	} ).then( () => {
+		return self.clients.claim();
+	} ) );
+} );
+```
+@[3](キャッシュのキーを列挙します)
+@[6](バージョン番号前まで一致し、それ以降が異なるキーのみを抽出します)
+@[9](古いキャッシュを削除します)
+@[13](SWを有効化します)
+
++++
+
+```
+self.addEventListener( 'fetch', ( event ) => {
+	console.log( 'SW:', 'fetch', event.request.url );
+	const url = new URL( event.request.url );
+
+	if ( url.origin == location.origin && url.pathname == '/Slide_PWA_0/5_dog2cat_cache/dog.svg' ) {
+		event.respondWith( caches.match( '/Slide_PWA_0/5_dog2cat_cache/cat.svg' ) );
+	}
+} );
+```
+@[5](キャッシュから猫の画像を引っ張り、そのレスポンスを返します)
+
++++
+
+### 挙動
 
 ---
 
