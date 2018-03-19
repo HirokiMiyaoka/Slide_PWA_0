@@ -1,10 +1,5 @@
-const DOMAIN = 'sample_static-v';
-const CACHE_VERSION = 1;
-const CACHE_NAME = DOMAIN + CACHE_VERSION;
-
 self.addEventListener( 'install', ( event ) => {
 	console.log( 'SW:', 'install' );
-	event.waitUntil( self.skipWaiting() );
 } );
 
 self.addEventListener( 'activate', ( event ) => {
