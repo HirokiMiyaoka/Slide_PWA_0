@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<title>Sample</title>
+<link rel="manifest" href="/Slide_PWA_0/manifest.json">
+<script type="text/javascript">
+function InitServiceWorker() {
+    if ( !( 'serviceWorker' in navigator ) ) { return Promise.reject( 'No ServiceWorker' ); }
+    navigator.serviceWorker.register( './sw.js', { scope: './' } );
+    return navigator.serviceWorker.ready.then( ( registration ) => {
+        if ( !registration.active ) { throw 'ServiceWorker not active.'; }
+        return registration;
+    } );
+}
+InitServiceWorker().then( ( registration ) => {
+    registration.addEventListener( 'updatefound', ( event ) => {
+        console.log( 'updatefound', event );
+    } );
+} );
+</script>
+<style type="text/css">
+	div { text-align: center; width: 50%; float: left; }
+</style>
+</head>
+<body>
+</body>
+</html>
