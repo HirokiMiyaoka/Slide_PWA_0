@@ -209,7 +209,7 @@ function InitServiceWorker() {
 ```
 function InitServiceWorker() {
     if ( !( 'serviceWorker' in navigator ) ) { return; }
-    navigator.serviceWorker.register( './sw.js', {scope: '/0_minimal'} );
+    navigator.serviceWorker.register( './sw.js', {scope: './'} );
 }
 ```
 
@@ -286,10 +286,10 @@ ServieceWorkerは以下のような特徴を持っています。
 * DOM操作等のAPIがなく、ブラウザ側の情報にアクセスできない
   * 通信処理を書けば情報やり取りは可能
 * `location` はServiceWorkerのある場所を基準にする
-* 以下のように `sw` オブジェクトに対してイベントを登録する
+* 以下のように `self` オブジェクトに対してイベントを登録する
 
 ```
-sw.addEventListener('install', (event) => { /*インストール時の挙動*/ });
+self.addEventListener('install', (event) => { /*インストール時の挙動*/ });
 ```
 
 +++
