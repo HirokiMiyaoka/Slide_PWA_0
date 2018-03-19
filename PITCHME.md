@@ -334,6 +334,44 @@ self.addEventListener('install', (event) => { /*インストール時の挙動*/
 
 ### 最小強制反映
 
++++?code=docs/1_install/sw.js&title=/1_install/sw.js
+
++++
+
+```
+self.addEventListener( 'install', ( event ) => {
+	console.log( 'SW:', 'install', ++count.install );
+	event.waitUntil( self.skipWaiting() );
+} );
+```
+@[1](インストール時のイベントの登録)
+@[3](self.skipWaitingで待機状態にしない)
+
++++
+
+```
+self.addEventListener( 'activate', ( event ) => {
+	console.log( 'SW:', 'activate', ++count.activate );
+	event.waitUntil( self.clients.claim() );
+} );
+```
+@[1](インストール後のイベントの登録)
+@[2](self.clients.claimで現在稼働中のクライアントのSWを今のものに置き換えます)
+
+install時の`self.skipWaiting`とセットで、強制的に新しいバージョンに反映が可能です。
+
+---
+
+## 犬を猫にするサンプル
+
+ライフサイクルを確認すべく、以下のようなことをしてみます。
+
+* 犬の画像を表示
+* SWをインストール要請5秒後に犬の画像をもう一枚表示
+    * この時間にはSWのインストールは終わっているだろうということで。
+* SW側ではインストール時に猫の画像を取得してキャッシュとして持つ
+* fetchイベントを登録し、犬の画像をリクエストされたらキャッシュしている猫の画像を返す
+
 ---
 
 ## まとめ
