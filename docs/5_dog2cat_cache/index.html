@@ -8,7 +8,7 @@
 function InitServiceWorker() {
     if ( !( 'serviceWorker' in navigator ) ) { return Promise.reject( 'No ServiceWorker' ); }
     navigator.serviceWorker.register( './sw.js', { scope: './' } );
-    return navigator.serviceWorker.ready.then( ( registration ) => {
+    return navigator.serviceWorker.ready.then( ( registration ) => {console.log('on ready');
         if ( !registration.active ) { throw 'ServiceWorker not active.'; }
         return registration;
     } );
