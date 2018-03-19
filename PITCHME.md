@@ -289,7 +289,7 @@ ServieceWorkerは以下のような特徴を持っています。
 * 以下のように `self` オブジェクトに対してイベントを登録する
 
 ```
-self.addEventListener('install', (event) => { /*インストール時の挙動*/ });
+self.addEventListener( 'install', (event) => { /*インストール時の挙動*/ } );
 ```
 
 +++
@@ -429,7 +429,6 @@ self.addEventListener( 'install', ( event ) => {
 	event.waitUntil( self.skipWaiting() );
 } );
 ```
-@[1](インストール時のイベントの登録)
 @[3](self.skipWaitingで待機状態にしない)
 
 +++
@@ -440,7 +439,6 @@ self.addEventListener( 'activate', ( event ) => {
 	event.waitUntil( self.clients.claim() );
 } );
 ```
-@[1](インストール後のイベントの登録)
 @[2](self.clients.claimで現在稼働中のクライアントのSWを今のものに置き換えます)
 
 ---
