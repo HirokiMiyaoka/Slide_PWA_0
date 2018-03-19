@@ -13,10 +13,19 @@ function InitServiceWorker() {
         return registration;
     } );
 }
-InitServiceWorker().then( ( registration ) => {
-    registration.addEventListener( 'updatefound', ( event ) => {
-        console.log( 'updatefound', event );
-    } );
+document.addEventListener( 'DOMContentLoaded', () => {
+    InitServiceWorker().then( ( registration ) => {
+        registration.addEventListener( 'updatefound', ( event ) => {
+            console.log( 'updatefound', event );
+        } );
+        document.getElementById( 'update' ).addEventListener( 'click', ()=> {
+            registration.update().then( () => {
+                if ( navigator.serviceWorker.controller ) { return ; }
+                console.log( 'Please update!' );
+                //location.reload();
+            } );
+        } );
+    }, false );
 } );
 </script>
 <style type="text/css">
@@ -24,5 +33,6 @@ InitServiceWorker().then( ( registration ) => {
 </style>
 </head>
 <body>
+	<button id="update">Update</button>
 </body>
 </html>
