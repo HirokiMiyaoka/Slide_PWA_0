@@ -20,7 +20,7 @@ self.addEventListener( 'activate', ( event ) => {
 				return caches.delete( key );
 			} )
 		);
-	} );
+	} ) );
 } );
 
 self.addEventListener( 'fetch', ( event ) => {
