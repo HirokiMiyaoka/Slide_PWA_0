@@ -9,15 +9,17 @@ function InitServiceWorker() {
     if ( !( 'serviceWorker' in navigator ) ) { return ; }
     navigator.serviceWorker.register( './sw.js', { scope: './' } );
 }
+InitServiceWorker();
 setTimeout( () => {
 	document.getElementById( 'cat' ).src = './dog.svg';
 }, 5000 );
 </script>
+<style type="text/css">
+	div { width: text-align: center; width: 50%; float: left; }
+</style>
 </head>
 <body>
-<h3>Dog</h3>
-<img src="./dog.svg">
-<h3>Cat</h3>
-<img id="cat">
+	<div><h3>Dog</h3><img src="./dog.svg"></div>
+	<div><h3>Cat</h3><img id="cat"></div>
 </body>
 </html>
