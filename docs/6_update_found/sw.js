@@ -1,4 +1,4 @@
-const VERSION = 1;
+const VERSION = 2;
 let count = { install: 0, activate: 0 };
 
 self.addEventListener( 'install', ( event ) => {
@@ -14,7 +14,6 @@ self.addEventListener( 'activate', ( event ) => {
 self.addEventListener( 'message', ( event ) => {
 	console.info( 'SW:', 'message', event.data );
 	event.waitUntil( self.clients.matchAll().then( ( client ) => {
-		console.log(client);
 		client[ 0 ].postMessage( { version: VERSION } );
 	} ) );
 } );
