@@ -5,9 +5,9 @@
 <title>Sample</title>
 <link rel="manifest" href="/Slide_PWA_0/manifest.json">
 <script type="text/javascript">
-function InitServiceWorker() {
+function InitServiceWorker( suffix ) {
     if ( !( 'serviceWorker' in navigator ) ) { return Promise.reject( 'No ServiceWorker' ); }
-    navigator.serviceWorker.register( './sw.js', { scope: './' } );
+    navigator.serviceWorker.register( './sw.js' + ( suffix || '' ), { scope: './' } );
     return navigator.serviceWorker.ready.then( ( registration ) => {
         if ( !registration.active ) { throw 'ServiceWorker not active.'; }
         return registration;
@@ -16,21 +16,22 @@ function InitServiceWorker() {
 document.addEventListener( 'DOMContentLoaded', () => {
     InitServiceWorker().then( ( registration ) => {
         registration.addEventListener( 'updatefound', ( event ) => {
-            console.log( 'updatefound:', new Date() );
+            console.log( 'updatefound:', new Date() );//location.reload();
         } );
         console.log( 'Set update button.' );
         document.getElementById( 'update' ).addEventListener( 'click', ()=> {
-            registration.update().then( () => {
-                if ( navigator.serviceWorker.controller ) { return ; }
-                console.log( 'Please update!' );
-                //location.reload();
-            } );
+            registration.update();
         } );
+    }, false );
+    let count = 0;
+    document.getElementById( 'force' ).addEventListener( 'click', () => {
+        InitServiceWorker( '?' + count );
     }, false );
 } );
 </script>
 </head>
 <body>
+	<button id="force">Force reload</button>
 	<button id="update">Update</button>
 </body>
 </html>
