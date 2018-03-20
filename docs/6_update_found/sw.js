@@ -12,9 +12,8 @@ self.addEventListener( 'activate', ( event ) => {
 } );
 
 self.addEventListener( 'message', ( event ) => {
-	console.info( 'SW:', 'message' );
+	console.info( 'SW:', 'message', event.data );
 	event.waitUntil( self.clients.matchAll().then( ( client ) => {
-		//event.data
-		client[ 0 ].postMessage( VERSION );
+		client[ 0 ].postMessage( { version: VERSION } );
 	} ) );
 } );

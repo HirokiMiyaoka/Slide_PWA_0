@@ -44,7 +44,7 @@ document.addEventListener( 'DOMContentLoaded', () => {
     document.getElementById( 'version' ).addEventListener( 'click', () => {
         SendMessage( 'Please SW version.' ).then( ( event ) => {
             console.log( event.data );
-            document.getElementById( 'printver' ).value = event.data;
+            document.getElementById( 'printver' ).value = event.data.version || '';
         } );
     }, false );
 } );
