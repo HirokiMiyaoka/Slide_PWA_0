@@ -914,7 +914,7 @@ Client == fetch ====================> Browser ==> WebServer
 
 [fetchイベント監視時]
 Client == fetch ==> ServiceWorker ==> Browser ==> WebServer
-       <=============================         <==
+       <===========               <==         <==
 ```
 
 fetchはJSの`fetch`や`<img>`のsrc指定など様々なHTTPリクエスト全てです。
