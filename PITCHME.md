@@ -346,7 +346,19 @@ SWには状態が3つあります。
 
 +++
 
-### ライフサイクルの図
+![](lifecycle_1.svg)
+
++++
+
+![](lifecycle_2.svg)
+
++++
+
+![](lifecycle_3.svg)
+
++++
+
+![](lifecycle_4.svg)
 
 ---
 
