@@ -24,7 +24,7 @@ function SendMessage( data ) {
                 resolve( event );
             }
         }, false );
-        navigator.serviceWorker.postMessage( msg, [ channel.port2 ] );
+        navigator.serviceWorker.postMessage( data, [ channel.port2 ] );
     } );
 }
 document.addEventListener( 'DOMContentLoaded', () => {
