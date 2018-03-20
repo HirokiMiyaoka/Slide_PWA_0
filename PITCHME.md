@@ -335,23 +335,23 @@ SWには状態が3つあります。
 
 +++
 
-![](lifecycle_0.svg)
+![](./assets/lifecycle_0.svg)
 
 +++
 
-![](lifecycle_1.svg)
+![](./assets/lifecycle_1.svg)
 
 +++
 
-![](lifecycle_2.svg)
+![](./assets/lifecycle_2.svg)
 
 +++
 
-![](lifecycle_3.svg)
+![](./assets/lifecycle_3.svg)
 
 +++
 
-![](lifecycle_4.svg)
+![](./assets/lifecycle_4.svg)
 
 ---
 
@@ -437,13 +437,13 @@ self.addEventListener( 'activate', ( event ) => {
 
 +++
 
-![](lifecycle_5.svg)
+![](./assets/lifecycle_5.svg)
 
 このようにすぐにSWが稼働しますが、ページ読み込み開始からの制御はできないので、途中から稼働を始めます。
 
 +++
 
-![](lifecycle_6.svg)
+![](./assets/lifecycle_6.svg)
 
 また、すでに今別のバージョンが稼働中の場合は待機します。
 
@@ -477,11 +477,11 @@ self.addEventListener( 'install', ( event ) => {
 
 +++
 
-![](lifecycle_7.svg)
+![](./assets/lifecycle_7.svg)
 
 +++
 
-![](lifecycle_8.svg)
+![](./assets/lifecycle_8.svg)
 
 他にSWが動いていようが関係なく即座にこの状態に持っていきます。
 
