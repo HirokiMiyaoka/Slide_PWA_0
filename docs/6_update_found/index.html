@@ -19,7 +19,7 @@ function SendMessage( data ) {
     navigator.serviceWorker.controller.postMessage( data, [ channel.port2 ] );
 }
 document.addEventListener( 'DOMContentLoaded', () => {
-    InitServiceWorker( '?2' ).then( ( registration ) => {
+    InitServiceWorker().then( ( registration ) => {
         console.log( 'Init' );
         registration.addEventListener( 'updatefound', ( event ) => {
             console.log( 'updatefound:', new Date() );//location.reload();
