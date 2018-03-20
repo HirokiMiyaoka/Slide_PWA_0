@@ -604,7 +604,7 @@ function InitServiceWorker() {
 document.addEventListener( 'DOMContentLoaded', () => {
     InitServiceWorker().then( ( registration ) => {
         registration.addEventListener( 'updatefound', ( event ) => {
-            console.log( 'updatefound' );
+            console.log( 'updatefound:', new Date() );
         } );
         console.log( 'Set update button.' );
         document.getElementById( 'update' ).addEventListener( 'click', ()=> {
