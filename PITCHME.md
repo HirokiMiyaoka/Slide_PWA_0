@@ -380,10 +380,12 @@ self.addEventListener( 'activate', ( event ) => {
 
 ライフサイクルを確認すべく、以下のようなことをしてみます。
 
-* 犬の画像を表示
-* SWをインストール要請5秒後に犬の画像をもう一枚表示
+* 犬の画像(dog.svg)を表示
+* SWをインストール要請5秒後に犬の画像(dog.svg)をもう一枚表示
     * この時間にはSWのインストールは終わっているだろうということで。
-* SW側ではfetchイベントを登録し、犬の画像をリクエストされたら猫の画像のリクエストに差し替える
+* SW側ではfetchイベントを登録し、犬の画像(dog.svg)をリクエストされたら猫の画像(cat.svg)のリクエストに差し替える
+
+1枚目は犬、2枚目は猫が表示されるよね？
 
 +++?code=docs/2_dog2cat/index.html&title=/Slide_PWA_0/2_dog2cat/index.html
 
@@ -401,9 +403,7 @@ self.addEventListener( 'fetch', ( event ) => {
 	const url = new URL( event.request.url );
 
 	if ( url.origin == location.origin && url.pathname == '/Slide_PWA_0/2_dog2cat/dog.svg' ) {
-		event.respondWith( fetch( '/Slide_PWA_0/2_dog2cat/cat.svg' ).then( ( response ) => {
-			return response;
-		} ) );
+		event.respondWith( fetch( '/Slide_PWA_0/2_dog2cat/cat.svg' ) );
 	}
 } );
 ```
