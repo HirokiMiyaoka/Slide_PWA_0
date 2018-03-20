@@ -10,3 +10,11 @@ self.addEventListener( 'activate', ( event ) => {
 	console.log( 'SW:', 'activate', ++count.activate );
 	event.waitUntil( self.clients.claim() );
 } );
+
+self.addEventListener( 'message', ( event ) => {
+	console.info( 'SW:', 'message' );
+	event.waitUntil( self.clients.matchAll().then( ( client ) => {
+		//event.data
+		client[ 0 ].postMessage( VERSION );
+	} ) );
+} );

@@ -13,6 +13,20 @@ function InitServiceWorker( suffix ) {
         return registration;
     } );
 }
+function SendMessage( data ) {
+    if ( !( 'serviceWorker' in navigator ) ) { return Promise.reject( 'No ServiceWorker' ); }
+    return new Promise( ( resolve, reject ) => {
+        const channel = new MessageChannel();
+        channel.port1.addEventListener( 'message', ( event ) => {
+            if ( event.data.error ) {
+                reject( event );
+            } else {
+                resolve( event );
+            }
+        }, false );
+        sw.postMessage( msg, [ channel.port2 ] );
+    } );
+}
 document.addEventListener( 'DOMContentLoaded', () => {
     InitServiceWorker().then( ( registration ) => {
         registration.addEventListener( 'updatefound', ( event ) => {
@@ -27,11 +41,19 @@ document.addEventListener( 'DOMContentLoaded', () => {
     document.getElementById( 'force' ).addEventListener( 'click', () => {
         InitServiceWorker( '?' + count );
     }, false );
+    document.getElementById( 'version' ).addEventListener( 'click', () => {
+        SendMessage( 'Please SW version.' ).then( ( event ) => {
+            console.log( event.data );
+            document.getElementById( 'printver' ).value = event.data;
+        } );
+    }, false );
 } );
 </script>
 </head>
 <body>
 	<button id="force">Force reload</button>
 	<button id="update">Update</button>
+	<button id="version">Get version</button>
+	<input type="text" id="printver">
 </body>
 </html>
