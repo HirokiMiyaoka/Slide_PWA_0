@@ -7,7 +7,7 @@
 <script type="text/javascript">
 function InitServiceWorker( suffix ) {
     if ( !( 'serviceWorker' in navigator ) ) { return Promise.reject( 'No ServiceWorker' ); }
-    navigator.serviceWorker.register( './sw.js' + ( suffix || '' ), { scope: './' } );
+    navigator.serviceWorker.register( './sw.js?1' + ( suffix || '' ), { scope: './' } );
     return navigator.serviceWorker.ready.then( ( registration ) => {
         if ( !registration.active ) { throw 'ServiceWorker not active.'; }
         return registration;
