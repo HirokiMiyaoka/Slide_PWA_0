@@ -1,4 +1,4 @@
-const VERSION = 3;
+const VERSION = 4;
 let count = 0;
 
 self.addEventListener( 'install', ( event ) => {
@@ -13,8 +13,10 @@ self.addEventListener( 'activate', ( event ) => {
 
 self.addEventListener( 'message', ( event ) => {
 	console.info( 'SW:', 'message', event.data );
-	event.waitUntil( self.clients.matchAll().then( ( client ) => {
-console.log(client);
-		client[ 0 ].postMessage( { version: VERSION, count: ++count } );
+	event.waitUntil( self.clients.matchAll().then( ( clients ) => {
+		clients.forEach( ( client ) => {
+			console.log(client);
+			client.postMessage( { version: VERSION, visible: client.visibilityState, count: ++count } );
+		} );
 	} ) );
 } );
