@@ -3,7 +3,7 @@ let count = 0;
 
 self.addEventListener( 'install', ( event ) => {
 	console.log( 'SW:', 'install', 'ver:' + VERSION );
-	event.waitUntil( self.skipWaiting() );
+	//event.waitUntil( self.skipWaiting() );
 } );
 
 self.addEventListener( 'activate', ( event ) => {
