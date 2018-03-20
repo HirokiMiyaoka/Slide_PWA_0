@@ -1,13 +1,12 @@
 const VERSION = 2;
-let count = { install: 0, activate: 0 };
 
 self.addEventListener( 'install', ( event ) => {
-	console.log( 'SW:', 'install', 'ver:' + VERSION, ++count.install );
+	console.log( 'SW:', 'install', 'ver:' + VERSION );
 	event.waitUntil( self.skipWaiting() );
 } );
 
 self.addEventListener( 'activate', ( event ) => {
-	console.log( 'SW:', 'activate', ++count.activate );
+	console.log( 'SW:', 'activate' );
 	event.waitUntil( self.clients.claim() );
 } );
 
