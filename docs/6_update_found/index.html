@@ -7,7 +7,7 @@
 <script type="text/javascript">
 function InitServiceWorker( suffix ) {
     if ( !( 'serviceWorker' in navigator ) ) { return Promise.reject( 'No ServiceWorker' ); }
-    navigator.serviceWorker.register( './sw.js?1' + ( suffix || '' ), { scope: './' } );
+    navigator.serviceWorker.register( './sw.js' + ( suffix || '' ), { scope: './' } );
     return navigator.serviceWorker.ready.then( ( registration ) => {
         if ( !registration.active ) { throw 'ServiceWorker not active.'; }
         return registration;
@@ -19,7 +19,7 @@ function SendMessage( data ) {
     navigator.serviceWorker.controller.postMessage( data, [ channel.port2 ] );
 }
 document.addEventListener( 'DOMContentLoaded', () => {
-    InitServiceWorker().then( ( registration ) => {
+    InitServiceWorker('?1').then( ( registration ) => {
         console.log( 'Init' );
         registration.addEventListener( 'updatefound', ( event ) => {
             console.log( 'updatefound:', new Date() );//location.reload();
