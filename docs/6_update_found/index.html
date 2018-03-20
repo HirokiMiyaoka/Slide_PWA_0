@@ -14,18 +14,9 @@ function InitServiceWorker( suffix ) {
     } );
 }
 function SendMessage( data ) {
-    if ( !( 'serviceWorker' in navigator ) ) { return Promise.reject( 'No ServiceWorker' ); }
-    return new Promise( ( resolve, reject ) => {
-        const channel = new MessageChannel();
-        channel.port1.addEventListener( 'message', ( event ) => {
-            if ( event.data.error ) {
-                reject( event );
-            } else {
-                resolve( event );
-            }
-        }, false );
-        navigator.serviceWorker.controller.postMessage( data, [ channel.port2 ] );
-    } );
+    if ( !( 'serviceWorker' in navigator ) ) { return; }
+    const channel = new MessageChannel();
+    navigator.serviceWorker.controller.postMessage( data, [ channel.port2 ] );
 }
 document.addEventListener( 'DOMContentLoaded', () => {
     InitServiceWorker().then( ( registration ) => {
@@ -37,15 +28,16 @@ document.addEventListener( 'DOMContentLoaded', () => {
             registration.update();
         } );
     }, false );
+    navigator.serviceWorker.addEventListener( 'message', ( event ) => {
+        console.log( 'Get message:', event.data );
+        document.getElementById( 'printver' ).value = event.data.version || '';
+    }, false );
     let count = 0;
     document.getElementById( 'force' ).addEventListener( 'click', () => {
         InitServiceWorker( '?' + count );
     }, false );
     document.getElementById( 'version' ).addEventListener( 'click', () => {
-        SendMessage( 'Please SW version.' ).then( ( event ) => {
-            console.log( event.data );
-            document.getElementById( 'printver' ).value = event.data.version || '';
-        } );
+        SendMessage( 'Please SW version.' );
     }, false );
 } );
 </script>
