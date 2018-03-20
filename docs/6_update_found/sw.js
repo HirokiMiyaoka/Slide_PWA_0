@@ -1,4 +1,4 @@
-const VERSION = 8;
+const VERSION = 9;
 let count = 0;
 
 self.addEventListener( 'install', ( event ) => {
