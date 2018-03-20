@@ -966,6 +966,7 @@ Webサーバーが作れるのでは？
     * それ以降は全ての通信がServieWorker管理下に置かれる
 * Webページのリソースはキャッシュのデータを返す
 * APIアクセスはServiceWorker側で処理をして返す
+    * 名前を登録してログイン+退会できるようにする
 
 +++?code=docs/server/sw.js&title=sw.js
 
