@@ -447,6 +447,10 @@ self.addEventListener( 'activate', ( event ) => {
 
 +++
 
+![](lifecycle_5.svg)
+
++++
+
 ### 挙動
 
 先ほど一行加えただけですが、以下のようになります。
