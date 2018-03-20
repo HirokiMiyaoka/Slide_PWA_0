@@ -52,7 +52,7 @@ Electron系は技術系ではよく使われているが、新規Webサービス
 * Chromeウェブストアから「Chrome Apps」のセクション削除--PWAに移行へ
     * https://japan.cnet.com/article/35111628/
 * Microsoft、年内に「Progressive Web Apps」（PWA）をアプリストアに追加へ
-    * http://www.itmedia.co.jp/news/articles/1802/08/news067.html
+    * http://www.itmedia.co.jp/news/articles/1802/08/news067.html
 * iOSのSafariでPWAがいよいよ動くようになった、iOS 11.3ベータ版がService Workerを本格的にサポート開始
     * https://www.suzukikenichi.com/blog/pwa-finally-begins-working-in-ios-safari/
 
