@@ -8,7 +8,7 @@ self.addEventListener( 'install', ( event ) => {
 
 self.addEventListener( 'activate', ( event ) => {
 	console.log( 'SW:', 'activate' );
-	//event.waitUntil( self.clients.claim() );
+	event.waitUntil( self.clients.claim() );
 } );
 
 self.addEventListener( 'message', ( event ) => {
