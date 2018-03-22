@@ -1,1 +1,1 @@
-
+self.addEventListener( 'install', (event) => {} );
