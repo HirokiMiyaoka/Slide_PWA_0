@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   xmlns="http://www.w3.org/2000/svg"
+   id="svg2"
+   width="300"
+   height="300"
+   viewBox="0 0 300.00001 300"
+   version="1.1">
+  <defs
+     id="defs13" />
+  <path
+     style="fill:#e6e6e6;"
+     d="m 260,160 c 0,80 0,100 -110,100 C 40,260 40,240 40,160 40,80 89.248678,60 150,60 c 60.75132,0 110,20 110,100 z"
+     id="path4135" />
+  <circle
+     style="fill:#cccccc;"
+     id="path4138"
+     cx="100"
+     cy="140"
+     r="20" />
+  <circle
+     r="20"
+     cy="140"
+     cx="200"
+     id="circle4140"
+     style="fill:#cccccc;" />
+  <path
+     style="fill:#cccccc;"
+     d="m 180,190 c 0,10 -13.43146,15 -30,15 -16.56854,0 -30,-5 -30,-15 0,-5.52285 13.43146,-10 30,-10 16.56854,0 30,4.47715 30,10 z"
+     id="path4150" />
+  <path
+     id="path3345"
+     d="M 150,60 140,20 120,30 Z"
+     style="fill:#e6e6e6;fill-rule:evenodd;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;fill-opacity:1" />
+  <path
+     id="path3347"
+     d="m 150,60 20,-50 20,10 z"
+     style="fill:#e6e6e6;fill-rule:evenodd;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;fill-opacity:1" />
+</svg>
