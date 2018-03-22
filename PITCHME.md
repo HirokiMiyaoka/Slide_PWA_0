@@ -778,6 +778,13 @@ SWの更新にはいろいろな問題があります。
 
 +++
 
+### サポートツール
+
+* Lighthouse
+    * https://chrome.google.com/webstore/detail/lighthouse/blipmdconlkpinefehnmjammfjpmpbjk?hl=ja
+
++++
+
 ### SWのlocationサンプル
 
 ```
