@@ -757,6 +757,17 @@ SWの更新にはいろいろな問題があります。
 
 ---
 
+## 参考資料とか
+
+* Service Worker のライフサイクル
+    * https://developers.google.com/web/fundamentals/primers/service-workers/lifecycle?hl=ja
+* Service Worker API
+    * https://developer.mozilla.org/en-US/docs/Web/API/Service_Worker_API
+* ウェブアプリのインストール バナー
+    * https://developers.google.com/web/fundamentals/app-install-banners/?hl=ja
+
+---
+
 ## キャッシュ利用例
 
 もう少し複雑なこととして、リクエストの書き換えではなく、あらかじめ猫の画像をキャッシュしておき、それのレスポンスを返すこととします。
