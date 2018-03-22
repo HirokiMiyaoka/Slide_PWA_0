@@ -1,8 +1,8 @@
 {
     "name": "PWA Lifecycle",
     "short_name": "PWA Lifecycle",
-    "start_url": "/Slide_PWA_0/index.html",
-    "icons": [{"src": "/Slide_PWA_0/icon-192.png", "sizes": "192x192" }],
+    "start_url": "./index.html?7",
+    "icons": [{"src": "./icon-192.png", "sizes": "192x192" }],
     "display": "standalone",
     "orientation": "portrait",
     "theme_color": "#333333"
