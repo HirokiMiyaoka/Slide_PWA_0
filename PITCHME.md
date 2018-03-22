@@ -359,7 +359,7 @@ SWには状態が3つあります。
 
 ## 犬を猫にするサンプル
 
-ライフサイクルを確認する前に、基本的な動作をサンプルで見ておきます。
+ライフサイクルを確認する簡単なサンプルを見てみます。
 
 * 犬の画像(dog.svg)を表示
 * SWをインストール要請5秒後に犬の画像(dog.svg)をもう一枚表示
@@ -489,7 +489,196 @@ self.addEventListener( 'install', ( event ) => {
 
 ---
 
-## さらに複雑な例
+## 通信を利用して、さらに挙動を見てみる
+
+とりあえずライフサイクルの基本的な挙動は見れたので、もう少し踏み込んだ挙動について見てみます。
+
++++
+
+### 今回やってみること
+
+* 更新してみるボタンと、何が何でも絶対更新するボタンを作ってSWの手動更新をしてみる
+* 更新を検出してみる
+* ボタンを押すとSWと通信をしてバージョンを確認できるようにする
+
++++
+
+### クライアント側でのアップデートの検出
+
+`navigator.serviceWorker.ready` は初回ならインストールが終わりSWの最低限の準備が出来次第呼ばれるPromiseで、その引数として渡される `registration` に更新を検出するイベントを登録することができます。
+
+具体的には次のように使います。
+
++++?code=docs/6_update_found/index.html&title=/Slide_PWA_0/6_update_found/index.html
+
++++
+
+### 新しいServiceWorkerの登録処理
+
+```
+function InitServiceWorker( suffix ) {
+    if ( !( 'serviceWorker' in navigator ) ) { return Promise.reject( 'No ServiceWorker' ); }
+    navigator.serviceWorker.register( './sw.js' + ( suffix || '' ), { scope: './' } );
+    return navigator.serviceWorker.ready.then( ( registration ) => {
+        if ( !registration.active ) { throw 'ServiceWorker not active.'; }
+        return registration;
+    } );
+}
+```
+@[2](Promiseを返す構造に変更)
+@[4](インストール後に返ってくるPromise)
+@[6](登録情報周りのオブジェクトを返す)
+
++++
+
+```
+function SendMessage( data ) {
+    if ( !( 'serviceWorker' in navigator ) ) { return; }
+    const channel = new MessageChannel();
+    navigator.serviceWorker.controller.postMessage( data, [ channel.port2 ] );
+}
+```
+@[3](SWと通信するために準備します)
+@[4](channel.port2がSW側なので、そこにデータを送ります)
+
++++
+
+```
+document.addEventListener( 'DOMContentLoaded', () => {
+    InitServiceWorker().then( ( registration ) => {
+        console.log( 'Init' );
+	// 次で見る
+    }, false );
+    // 次の次で見る
+} );
+```
+
++++
+
+```
+        registration.addEventListener( 'updatefound', ( event ) => {
+            console.log( 'updatefound:', new Date() );//location.reload();
+        } );
+        navigator.serviceWorker.addEventListener( 'message', ( event ) => {
+            console.log( 'Get message:', event.data );
+            document.getElementById( 'printver' ).value = event.data.version || '';
+        }, false );
+        document.getElementById( 'update' ).addEventListener( 'click', ()=> {
+            registration.update();
+        } );
+```
+@[1,2,3](SWの更新が見つかった場合に呼ばれる。ここでリロードなどを行ったりする)
+@[4,5,6,7](SWからメッセージが来たときに呼ばれる。今回はバージョンしかないのでそれを表示する)
+@[8,9,10](SWを更新してみる。ただし更新されるとは限らない)
+
++++
+
+```
+    document.getElementById( 'force' ).addEventListener( 'click', () => {
+        InitServiceWorker( '?' + Math.random() );
+    }, false );
+    document.getElementById( 'version' ).addEventListener( 'click', () => {
+        SendMessage( { message: 'Please SW version.' } );
+    }, false );
+```
+@[1,2,3](強制的にSWを更新する)
+@[4,5,6](SWにメッセージを送り、バージョン番号を要求する)
+
++++?code=docs/6_update_found/sw.js&title=/Slide_PWA_0/6_update_found/sw.js
+
++++
+
+```
+self.addEventListener( 'install', ( event ) => {
+	console.log( 'SW:', 'install', 'ver:' + VERSION );
+	event.waitUntil( self.skipWaiting() );
+} );
+
+self.addEventListener( 'activate', ( event ) => {
+	console.log( 'SW:', 'activate' );
+	event.waitUntil( self.clients.claim() );
+} );
+```
+
+一旦強制更新にしておきます。
+
++++
+
+```
+self.addEventListener( 'message', ( event ) => {
+    console.info( 'SW:', 'message', event.data );
+    event.waitUntil( self.clients.matchAll().then( ( clients ) => {
+        clients.forEach( ( client ) => {
+            console.log(client);
+            client.postMessage( { version: VERSION, visible: client.visibilityState, count: ++count } );
+        } );
+    } ) );
+} );
+```
+@[1](クライアント側からのメッセージを受け取るイベント)
+@[3](クライアントの一覧を取得する)
+@[4,5,6,7](各クライアントにバージョン番号などを送る)
+
++++
+
+### 下準備
+
+まずは以下の状態にします。
+
+* 初回ページを開く
+* 新しいタブを開いて2ページ目を開く
+
++++
+
+### バージョンの要求
+
+* 2つのページのうち、片方でSWのバージョンを要求するボタンを押す
+* 片方のページでバージョン番号が返ってくる
+* もう片方のページを開くと、そちらにもバージョン番号が返ってきている
+
+とりあえずSWとの通信には成功します。
+SWは複数クライアントでも1つしか起動せず、またSW経由で他のクライアントに対して何らかの作業を行わせることが可能です。
+
++++
+
+### 立ちふさがる問題
+
+* SWの更新をどうするか
+    * 強制更新するかしないか
+    * URL末尾の変更などでSW更新対策ができるが、どう更新していくか
+* キャッシュをどうするか
+    * 例えばHTMLページをSWでキャッシュしてしまった場合、ちゃんとキャッシュを制御しないといつまでもキャッシュを持ち続けてしまう
+
+サービスによっていろいろ選択肢はあると思いますが、このライフサイクル部分は初めにどうするか決めて、ちゃんと実装しておく必要があります。
+
++++
+
+### とりあえず
+
+現状、とりあえずそこそこ安全かなと思われるのは以下対応です。
+
+* SWは強制更新状態にしておく
+* クライアント側でアップデートを検知し、リロードする
+
+強制更新なら今一番新しいクライアントは最新状態だし、今最新じゃない非活性なクライアントも更新+リロードが走るので、大体新しくなるはず。
+
+---
+
+## まとめ
+
+* PWAは今までのWebアプリで不可能だった様々な動作を可能とする
+* SWは更新周り以外はわりと簡単
+* SWをインストールした直後は動作しなかったり、置き換えが発生しない
+    * SWは1つのPWA対応サイトに対し複数設定できるが、同じscopeのSWは1つしか動作しないため、処理の不整合を防がなければならない
+    * 不整合とかどうでもいいから新しいのを適用する方法もあるが、それでも更新問題は残る
+* キャッシュに関してはいろいろあるので何か考えておくこと
+    * SWへのキャッシュはヘッダや1日ルールがあるので、場合に応じて適切なキャッシュ対策を施す必要がある
+
+---
+
+---
+
+## キャッシュ利用例
 
 もう少し複雑なこととして、リクエストの書き換えではなく、あらかじめ猫の画像をキャッシュしておき、それのレスポンスを返すこととします。
 SW以外は同じ挙動とします。
@@ -596,381 +785,3 @@ self.addEventListener( 'fetch', ( event ) => {
     * クライアント側では404のエラーが出ない
 * リクエストするたびに結果をキャッシュし、次回以降アクセスが発生しないようにする
     * SNSのアイコンをキャッシュしてリクエストを抑えるなど
-
----
-
-## SW更新への対応
-
-とりあえず強制更新についてはなんとなくいい感じにできそうな気がしてきましたが、そうじゃない場合はどうするかが問題です。
-
-ここから本気を出してライフサイクルを見ていきます。
-
-+++
-
-### 今回やってみること
-
-* 強制更新の段階を踏んでみる
-* 更新してみるボタンと、何が何でも絶対更新するボタンを作ってSWの手動更新をしてみる
-* 更新を検出してみる
-* ボタンを押すとSWと通信をしてバージョンを確認できるようにする
-
-+++
-
-### クライアント側でのアップデートの検出
-
-`navigator.serviceWorker.ready` は初回ならインストールが終わりSWの最低限の準備が出来次第呼ばれるPromiseで、その引数として渡される `registration` に更新を検出するイベントを登録することができます。
-
-具体的には次のように使います。
-
-+++?code=docs/6_update_found/index.html&title=/Slide_PWA_0/6_update_found/index.html
-
-+++
-
-### 新しいServiceWorkerの登録
-
-```
-function InitServiceWorker( suffix ) {
-    if ( !( 'serviceWorker' in navigator ) ) { return Promise.reject( 'No ServiceWorker' ); }
-    navigator.serviceWorker.register( './sw.js' + ( suffix || '' ), { scope: './' } );
-    return navigator.serviceWorker.ready.then( ( registration ) => {
-        if ( !registration.active ) { throw 'ServiceWorker not active.'; }
-        return registration;
-    } );
-}
-```
-@[2](Promiseを返す構造に変更)
-@[4](インストール後に返ってくるPromise)
-@[6](登録情報周りのオブジェクトを返す)
-
-+++
-
-```
-function SendMessage( data ) {
-    if ( !( 'serviceWorker' in navigator ) ) { return; }
-    const channel = new MessageChannel();
-    navigator.serviceWorker.controller.postMessage( data, [ channel.port2 ] );
-}
-```
-@[3](SWと通信するために準備します)
-@[4](channel.port2がSW側なので、そこにデータを送ります)
-
-+++
-
-```
-document.addEventListener( 'DOMContentLoaded', () => {
-    InitServiceWorker().then( ( registration ) => {
-        console.log( 'Init' );
-	// 次で見る
-    }, false );
-    // 次の次で見る
-} );
-```
-
-+++
-
-```
-        registration.addEventListener( 'updatefound', ( event ) => {
-            console.log( 'updatefound:', new Date() );//location.reload();
-        } );
-        navigator.serviceWorker.addEventListener( 'message', ( event ) => {
-            console.log( 'Get message:', event.data );
-            document.getElementById( 'printver' ).value = event.data.version || '';
-        }, false );
-        document.getElementById( 'update' ).addEventListener( 'click', ()=> {
-            registration.update();
-        } );
-```
-@[1,2,3](SWの更新が見つかった場合に呼ばれる。ここでリロードなどを行ったりする)
-@[4,5,6,7](SWからメッセージが来たときに呼ばれる。今回はバージョンしかないのでそれを表示する)
-@[8,9,10](SWを更新してみる。ただし更新されるとは限らない)
-
-+++
-
-```
-    document.getElementById( 'force' ).addEventListener( 'click', () => {
-        InitServiceWorker( '?' + Math.random() );
-    }, false );
-    document.getElementById( 'version' ).addEventListener( 'click', () => {
-        SendMessage( { message: 'Please SW version.' } );
-    }, false );
-```
-@[1,2,3](強制的にSWを更新する)
-@[4,5,6](SWにメッセージを送り、バージョン番号を要求する)
-
-+++?code=docs/6_update_found/sw.js&title=/Slide_PWA_0/6_update_found/sw.js
-
-+++
-
-```
-self.addEventListener( 'install', ( event ) => {
-	console.log( 'SW:', 'install', 'ver:' + VERSION );
-	//event.waitUntil( self.skipWaiting() );
-} );
-
-self.addEventListener( 'activate', ( event ) => {
-	console.log( 'SW:', 'activate' );
-	//event.waitUntil( self.clients.claim() );
-} );
-```
-
-一番初めのSWの更新制御はこのようにします。
-
-+++
-
-```
-self.addEventListener( 'message', ( event ) => {
-    console.info( 'SW:', 'message', event.data );
-    event.waitUntil( self.clients.matchAll().then( ( clients ) => {
-        clients.forEach( ( client ) => {
-            console.log(client);
-            client.postMessage( { version: VERSION, visible: client.visibilityState, count: ++count } );
-        } );
-    } ) );
-} );
-```
-@[1](クライアント側からのメッセージを受け取るイベント)
-@[3](クライアントの一覧を取得する)
-@[4,5,6,7](各クライアントにバージョン番号などを送る)
-
-+++
-
-### 下準備
-
-まずは以下の状態にします。
-
-* 初回ページを開く
-* 新しいタブを開いて2ページ目を開く
-
-+++
-
-### バージョンの要求
-
-* 今回始めのページはSWが無効のままなので何も発生しない
-* 次に開いたページはSWが有効なのでバージョンが得られる
-
-とりあえずSWとの通信には成功します。
-
-+++
-
-### 更新のテスト1
-
-強制更新などやってみても、結局古い方のSWを参照してしまうので、キャッシュの期限が切れるか1日立たないと最新の状態になりません。
-
-+++
-
-### SWの即時反映（古いSWがある場合は待機する）
-
-```
-self.addEventListener( 'activate', ( event ) => {
-	console.log( 'SW:', 'activate' );
-	event.waitUntil( self.clients.claim() );
-} );
-```
-
-新しいバージョンのSWのインストールに成功したら、すぐに反映するようにします。
-
-+++
-
-### バージョンの要求
-
-* シークレットウィンドウを閉じ、再度同じページを2つ開く
-* 初回開いたときからSWは有効なため、どちらもバージョンを取得可能
-* どちらかのページでバージョン要求のボタンを押すと、現在のSWのバージョンなどが返ってくる
-* もう片方のページを開くと、SWからバージョン情報が送られているので、バージョンが表示されている
-
-1つのSWが複数のクライアントを制御していることが分かります。
-
-+++
-
-### 更新のテスト2
-
-* 普通の更新をしてみても、多分更新は何も走らない
-* SWを更新しておいてから更新ボタンを押しても、多分更新は走らない
-
-一応キャッシュのヘッダを見るらしいので、1日経過していない状態では更新が走りません。
-
-+++
-
-### 更新のテスト3
-
-* 今回用意した強制更新を行って、必ず最新のSWを登録する
-* 各クライアントでupdatefoundイベントが走る
-* バージョンを取得してみると、まだ前のバージョンを返される
-
-+++
-
-以下のような対応を入れてみる
-
-* HTMLのコードを以下のように変える
-
-```
-    InitServiceWorker('?1').then( ( registration ) => {
-```
-
-+++
-
-### 更新のテスト4
-
-* 新しいSWを取得する処理を入れたので、ページURL末尾に `?1` を付けて確実に新しいHTMLを取得して更新してみるが前バージョン
-* 一度すべてのタブを閉じ、同じURLにアクセスすると、新しいバージョンになる
-
-待機状態をスキップしないため、ページもSWも新しい状態にしたとしても、これくらい頑張らないと新しいSWにならない。
-
-
-+++
-
-### 更新の強制反映がある場合（待機状態なし）
-
-```
-self.addEventListener( 'install', ( event ) => {
-    console.log( 'SW:', 'install', 'ver:' + VERSION );
-    event.waitUntil( self.skipWaiting() );
-} );
-```
-
-```
-    InitServiceWorker().then( ( registration ) => {
-```
-
-最強の更新処理を入れ、HTMLは元に戻します。
-
-+++
-
-### 更新のテスト5
-
-* シークレットウィンドウを閉じて、再度新しく2ページ開いてみる
-* バージョンを取得した後新しいSWにして、強制更新ボタンを押してみる
-* バージョンを取得すると新しいSWに切り替えられているため、新しいバージョンが返される
-* ただし再度更新すると、古いSWがブラウザキャッシュにあり、1日経過していないため旧SWが再インストールされる
-
-+++
-
-### 挙動のまとめ
-
-* SWは複数のクライアントを制御しているため、SW経由で他クライアントの更新も可能
-* 更新の強制反映がない場合、初回だけでなくなかなか新しい状態にはならない
-* SWの更新を検出することは可能
-    * 更新を検出しても待機状態をスキップしない限り古いまま動き続けるので、何かしら対応
-    * 強制更新の場合はリロードしてクライアントとSWのバージョンを揃えるとか
-
-+++
-
-### 立ちふさがる問題
-
-* SWの更新をどうするか
-    * 強制更新するかしないか
-    * URL末尾の変更などでSW更新対策ができるが、どう更新していくか
-* キャッシュをどうするか
-    * 例えばHTMLページをSWでキャッシュしてしまった場合、ちゃんとキャッシュを制御しないといつまでもキャッシュを持ち続けてしまう
-
-サービスによっていろいろ選択肢はあると思いますが、このライフサイクル部分は初めにどうするか決めて、ちゃんと実装しておく必要があります。
-
-+++
-
-### とりあえず
-
-現状、とりあえずそこそこ安全かなと思われるのは以下対応です。
-
-* SWは強制更新状態にしておく
-* クライアント側でアップデートを検知し、リロードする
-
-強制更新なら今一番新しいクライアントは最新状態だし、今最新じゃない非活性なクライアントも更新+リロードが走るので、大体新しくなるはず。
-
----
-
-## まとめ
-
-* PWAは今までのWebアプリで不可能だった様々な動作を可能とする
-* SWは更新周り以外はわりと簡単
-* SWをインストールした直後は動作しなかったり、置き換えが発生しない
-    * SWは1つのPWA対応サイトに対し複数設定できるが、同じscopeのSWは1つしか動作しないため、処理の不整合を防がなければならない
-    * 不整合とかどうでもいいから新しいのを適用する方法もあるが、それでも更新問題は残る
-* キャッシュに関してはいろいろあるので何か考えておくこと
-    * SWへのキャッシュはヘッダや1日ルールがあるので、場合に応じて適切なキャッシュ対策を施す必要がある
-
----
-
- 【余裕があるならServiceWorker実例】
-
----
-
-## ServiceWorkerでXXXXXXを作ってみた
-
-+++
-
-### fetchイベントによる通信の制御について
-
-ServiceWorkerは通信の制御が可能です。この通信とは以下のような流れです。
-
-```
-[通常]
-Client == fetch ====================> Browser ==> WebServer
-       <=============================         <==
-
-[fetchイベント監視時]
-Client == fetch ==> ServiceWorker ==> Browser ==> WebServer
-       <===========               <==         <==
-```
-
-fetchはJSの`fetch`や`<img>`のsrc指定など様々なHTTPリクエスト全てです。
-
-+++
-
-### ServiceWorkerでエラーなくエラー画像を返してみた
-
-JSとブラウザの通信の間に挟まっているので、レスポンスがエラーの画像の時には、あらかじめ持っているエラー画像を200で返すことも可能
-
-```
-[画像がないとき]
-Client == fetch ====================> Browser ==> WebServer
-   404 <============================= 404     <== 404
-
-[画像がないときにエラー画像を返す]
-Client == fetch ==> ServiceWorker ==> Browser ==> WebServer
-   200 <===========  エラーなので   <== 404     <== 404
-                     エラー画像を
-                     200で返す
-```
-
-+++
-
-レスポンスの書き換えが可能なら、つまり、こういうことも可能。
-
-```
-[fetchイベント監視時]
-Client == fetch ==> ServiceWorker ==> Browser ==> WebServer
-       <===========               <==         <==
-[fetchイベント監視時]
-Client == fetch ==> ServiceWorker
-       <=========== Responseを作って返す
-```
-
-+++
-
-Webサーバーが作れるのでは？
-
-+++
-
-### ServiceWorkerでWeb/APIサーバーを作ってみた
-
-仕様：
-
-* 初回は絶対にWebサーバーからダウンロードが走るので、その時に必要ファイルをすべてキャッシュする
-    * HTML、JS、最低限の画像
-* 準備完了次第Webページをリロードする
-    * それ以降は全ての通信がServieWorker管理下に置かれる
-* Webページのリソースはキャッシュのデータを返す
-* APIアクセスはServiceWorker側で処理をして返す
-    * 名前を登録してログイン+退会できるようにする
-
-+++?code=docs/server/sw.js&title=sw.js
-
-+++
-
-### 今回のサンプルの利用価値について
-
-ぶっちゃけるとほぼ無意味。
-
-ただ、開発時に仮APIをServiceWorkerで作ってWebアプリ側は通常のアクセスのように振る舞うとか、一人プレイはServiceWorkerが対応し、複数人の時のみサーバーが頑張る作りにすれば、Webアプリ側の実装をほぼ変えずに対応可能とか、そういう使い道はあるかも。
-
-ついでに、Node.jsのExpressのServiceWorker版もお遊びで作られているらしいので、何か有効な使い方をする人が出てくるかも？
