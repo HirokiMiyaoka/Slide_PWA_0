@@ -778,6 +778,24 @@ SWの更新にはいろいろな問題があります。
 
 +++
 
+### SWのlocationサンプル
+
+```
+{
+	hash: "",
+	host: "example.com",
+	hostname: "example.com",
+	href: "https://example.com/XXX/sw.js",
+	origin: "https://example.com",
+	pathname: "/XXX/sw.js",
+	port: "",
+	protocol: "https:",
+	search: ""
+}
+```
+
++++
+
 ### 参考資料とか
 
 * Service Worker のライフサイクル
