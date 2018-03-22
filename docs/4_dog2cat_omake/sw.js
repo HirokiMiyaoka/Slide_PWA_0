@@ -14,5 +14,6 @@ self.addEventListener( 'fetch', ( event ) => {
 
 	if ( url.origin == location.origin && url.pathname == '/Slide_PWA_0/4_dog2cat_omake/dog.svg' ) {
 		event.respondWith( fetch( '/Slide_PWA_0/4_dog2cat_omake/cat.svg' ) );
+		//event.respondWith( fetch( '/Slide_PWA_0/4_dog2cat_omake/bird.svg' ) );
 	}
 } );
