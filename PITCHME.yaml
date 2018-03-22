@@ -1,5 +1,5 @@
 theme : white
 theme-override : ./PITCHME.css
-logo : docs/icon-144.png
+logo : docs/icon-192.png
 footnote : "© 2018 Hiroki"
 slide-number: true
