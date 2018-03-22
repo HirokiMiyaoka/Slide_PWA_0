@@ -1,7 +1,7 @@
 {
     "name": "PWA Lifecycle",
     "short_name": "PWA Lifecycle",
-    "start_url": "https://hirokimiyaoka.github.io/Slide_PWA_0/0_minimal/",
+    "start_url": "/",
     "icons": [{"src": "/Slide_PWA_0/icon-192.png", "sizes": "192x192" }],
     "display": "standalone",
     "orientation": "portrait",
