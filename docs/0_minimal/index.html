@@ -7,7 +7,7 @@
 <script type="text/javascript">
 function InitServiceWorker() {
     if ( !( 'serviceWorker' in navigator ) ) { return; }
-    navigator.serviceWorker.register( '/Slide_PWA_0/0_minimal/sw.js?2', { scope: '/Slide_PWA_0/0_minimal/' } );
+    navigator.serviceWorker.register( './sw.js', { scope: './' } );
 }
 InitServiceWorker();
 </script>
