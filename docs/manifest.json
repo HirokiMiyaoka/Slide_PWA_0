@@ -1,7 +1,7 @@
 {
     "name": "PWA Lifecycle",
     "short_name": "PWA Lifecycle",
-    "start_url": "./index.html?7",
+    "start_url": "./index.html?9",
     "icons": [{"src": "./icon-192.png", "sizes": "192x192" }],
     "display": "standalone",
     "orientation": "portrait",
