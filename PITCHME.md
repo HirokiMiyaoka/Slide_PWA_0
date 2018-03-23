@@ -446,6 +446,8 @@ self.addEventListener( 'fetch', ( event ) => {
 
 SWインストール後すぐに有効化します。
 
+これにより、犬の画像を表示した後猫の画像が表示されるはず……！
+
 +++?code=docs/3_dog2cat_update/sw.js&title=/Slide_PWA_0/3_dog2cat_update/sw.js
 
 +++
@@ -532,9 +534,27 @@ self.addEventListener( 'install', ( event ) => {
 
 ### 今回やってみること
 
-* 更新してみるボタンと、何が何でも絶対更新するボタンを作ってSWの手動更新をしてみる
-* 更新を検出してみる
 * ボタンを押すとSWと通信をしてバージョンを確認できるようにする
+* 更新を検出してみる
+* 更新してみるボタンと、何が何でも絶対更新するボタンを作ってSWの手動更新をしてみる
+
++++?code=docs/6_update_found/index.html&title=/Slide_PWA_0/6_update_found/index.html
+
++++
+
+### クライアントからSWにメッセージを送る（通信）
+
+```
+function SendMessage( data ) {
+    if ( !( 'serviceWorker' in navigator ) ) { return; }
+    const channel = new MessageChannel();
+    navigator.serviceWorker.controller.postMessage( data, [ channel.port2 ] );
+}
+```
+@[3](SWと通信するために準備します)
+@[4](channel.port2がSW側なので、そこにデータを送ります)
+@[10](メッセージの受信は後で出てきます)
+
 
 +++
 
@@ -543,8 +563,6 @@ self.addEventListener( 'install', ( event ) => {
 `navigator.serviceWorker.ready` は初回ならインストールが終わりSWの最低限の準備が出来次第呼ばれるPromiseで、その引数として渡される `registration` に更新を検出するイベントを登録することができます。
 
 具体的には次のように使います。
-
-+++?code=docs/6_update_found/index.html&title=/Slide_PWA_0/6_update_found/index.html
 
 +++
 
@@ -566,31 +584,23 @@ function InitServiceWorker( suffix ) {
 
 +++
 
-### クライアントからSWにメッセージを送る（通信）
+### メッセージの受け取り、アップデート依頼
 
-```
-function SendMessage( data ) {
-    if ( !( 'serviceWorker' in navigator ) ) { return; }
-    const channel = new MessageChannel();
-    navigator.serviceWorker.controller.postMessage( data, [ channel.port2 ] );
-}
-```
-@[3](SWと通信するために準備します)
-@[4](channel.port2がSW側なので、そこにデータを送ります)
-
-+++
+ボタンやSWとの連動の関係上、DOM構築後にいろいろやります。
 
 ```
 document.addEventListener( 'DOMContentLoaded', () => {
     InitServiceWorker().then( ( registration ) => {
         console.log( 'Init' );
-        // 次で見る
+        // 次で見る:メッセージの受け取りやアップデート依頼
     }, false );
-    // 次の次で見る
+    // 次の次で見る:強制更新を試す
 } );
 ```
 
 +++
+
+### メッセージの受け取りやアップデート依頼
 
 ```
         registration.addEventListener( 'updatefound', ( event ) => {
@@ -609,6 +619,8 @@ document.addEventListener( 'DOMContentLoaded', () => {
 @[8,9,10](SWを更新してみる。ただし更新されるとは限らない)
 
 +++
+
+### 強制更新を試す
 
 ```
     document.getElementById( 'force' ).addEventListener( 'click', () => {
@@ -637,9 +649,11 @@ self.addEventListener( 'activate', ( event ) => {
 } );
 ```
 
-一旦強制更新にしておきます。
+挙動が見やすいため、強制更新にしておきます。
 
 +++
+
+### メッセージの受け取り&返信
 
 ```
 self.addEventListener( 'message', ( event ) => {
