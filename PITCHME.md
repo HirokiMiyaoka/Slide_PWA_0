@@ -816,6 +816,18 @@ SWの更新にはいろいろな問題があります。
 
 +++
 
+### SWの削除
+
+```
+navigator.serviceWorker.getRegistrations().then(function(registrations) {
+    for(let registration of registrations) {
+        registration.unregister();
+    }
+});
+```
+
++++
+
 ### 参考資料とか
 
 * Service Worker のライフサイクル
